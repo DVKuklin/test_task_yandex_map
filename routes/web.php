@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\AuthController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,6 +14,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+Route::name('page.')->controller(PageController::class)->group(function(){
+    Route::get('/', 'index')->name('home');
+    Route::get('/register', 'register')->name('register');
+    Route::get('/login', 'login')->name('login');
+});
+
+Route::name('auth.')->prefix('auth')->controller(AuthController::class)->group(function(){
+    Route::post('/register', 'register')->name('register');
+    Route::post('/login', 'login')->name('login');;
+    Route::post('/logout', 'logout')->name('logout');;
 });
