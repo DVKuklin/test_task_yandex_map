@@ -10,6 +10,10 @@ use App\Models\User;
 class AuthController extends Controller
 {
     public function register(Request $request) {
+        if (Auth::user()) {
+            return redirect()->route('page.home');
+        }
+        
         $credentials = $request->validate([
             'name' => ['required'],
             'email' => ['required', 'email'],
@@ -71,6 +75,10 @@ class AuthController extends Controller
     }
 
     public function login(Request $request) {
+        if (Auth::user()) {
+            return redirect()->route('page.home');
+        }
+
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required']

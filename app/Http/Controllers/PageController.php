@@ -12,9 +12,17 @@ class PageController extends Controller
     }
 
     public function register() {
+        if (Auth::user()) {
+            return redirect()->route('page.home');
+        }
+
         return view('auth.register');
     }
     public function login() {
+        if (Auth::user()) {
+            return redirect()->route('page.home');
+        }
+        
         return view('auth.login');
     }
 }
