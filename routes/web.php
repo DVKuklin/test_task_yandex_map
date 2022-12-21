@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PointController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -28,4 +29,10 @@ Route::name('auth.')->prefix('auth')->controller(AuthController::class)->group(f
     Route::post('/register', 'register')->name('register');
     Route::post('/login', 'login')->name('login');
     Route::post('/logout', 'logout')->name('logout');
+});
+
+Route::name('point.')->prefix('point')->controller(PointController::class)->group(function(){
+    Route::post('/create', 'createPoint')->name('create')->middleware('auth');
+    Route::post('/update', 'updatePoint')->name('update')->middleware('auth');
+    Route::post('/delete', 'deletePoint')->name('delete')->middleware('auth');
 });

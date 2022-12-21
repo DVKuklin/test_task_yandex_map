@@ -19,7 +19,6 @@ class AuthController extends Controller
             'email' => ['required', 'email'],
             'password' => ['required'],
             'password_confirm' => ['required']
-
         ], [
             'email.required' => 'Поле Email является обязательным',
             'name.required' => 'Поле Имя является обязательным',
