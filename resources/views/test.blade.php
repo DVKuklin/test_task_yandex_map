@@ -7,6 +7,11 @@
     <title>test</title>
 </head>
 <body>
-    {{$data}}
+    <pre>
+        {{var_dump($message)}}
+    </pre>
+    <pre>
+        return view('test',['message'=>'Мы в pointUpdate']);
+    </pre>
 </body>
 </html>

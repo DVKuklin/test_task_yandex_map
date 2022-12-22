@@ -9,6 +9,7 @@
     @auth
         <script src="https://api-maps.yandex.ru/2.1/?apikey=4d433ec3-d155-44eb-bf63-1f42ec9fd902&lang=ru_RU" type="text/javascript"></script>
         <script src="/js/app.js" type="text/javascript"></script>
+        <script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
     @endauth
 </head> 
 <body>
