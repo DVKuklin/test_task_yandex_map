@@ -10,12 +10,11 @@ class PointController extends Controller
 {
     public function createPoint(Request $request) {
         $point = $request->validate([
-            'name' => 'required|unique:App\Models\Point,name',
+            'name' => 'required',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
         ],[
             'name.required' => 'Поле Имя является обязательным',
-            'name.unique' => 'Точка с таким имененм уже существует',
             'latitude.required' => 'Поле Широта является обязательным',
             'latitude.numeric' => 'Значение широты должно быть числом',
             'longitude.required' => 'Поле Долгота является обязательным',
@@ -23,7 +22,16 @@ class PointController extends Controller
         ]);
 
         $user_id = Auth::id();
- 
+
+        // Проверяем есть ли другая точка с таким именем у этого пользователя
+        $pointWithSameName = Point::where('name',$point["name"])
+                                    ->where('user_id',$user_id)
+                                    ->first();
+
+        if ($pointWithSameName) {
+            return back()->withErrors(['Точка с таким именем уже существует.']);
+        }
+
         try{
             $res = Point::create([
                 'name' => $point["name"],
@@ -72,7 +80,16 @@ class PointController extends Controller
             'longitude.numeric' => 'Значение Долготы должно быть числом',
         ]);
 
-        // Проверяем есть ли другая точка с таким именем
+        //Проверяем принадлежит ли точка пользователю
+        $pointFromBd = Point::where('id',$point["point_id"])
+                            ->where('user_id',Auth::id())
+                            ->first();
+
+        if (!$pointFromBd) {
+            return back()->withErrors(['Что то пошло не так, перезагрузите страницу.']);
+        }
+
+        // Проверяем есть ли другая точка с таким именем у этого пользователя
         $pointWithSameName = Point::where('name',$point["name"])
                                   ->where('user_id',Auth::id())
                                   ->where('id','!=',$point["point_id"])
@@ -110,6 +127,15 @@ class PointController extends Controller
             'point_id.integer' => 'Что то не так, перезагрузите страницу',
         ]);
 
+        //Проверяем принадлежит ли точка пользователю
+        $pointFromBd = Point::where('id',$point["point_id"])
+                            ->where('user_id',Auth::id())
+                            ->first();
+
+        if (!$pointFromBd) {
+            return back()->withErrors(['Что то пошло не так, перезагрузите страницу.']);
+        }
+
         try {
             $res = Point::where('id',$point["point_id"])
                         ->delete();
@@ -125,4 +151,5 @@ class PointController extends Controller
         }
 
     }
+
 }

@@ -8,11 +8,11 @@
             </div>        
             <div class="mb-3">
                 <label class="form-label">Широта</label>
-                <input type="text" class="form-control" name="latitude">
+                <input type="text" class="form-control" name="latitude" id="newPointLatitude">
             </div>
             <div class="mb-3">
                 <label class="form-label">Долгота</label>
-                <input type="text" class="form-control" name="longitude">
+                <input type="text" class="form-control" name="longitude" id="newPointLongitude">
             </div>
             <button type="submit" class="btn btn-primary">Добавить точку</button>
         </form>
@@ -25,6 +25,9 @@
                     <form action=" {{route('point.update') }} " method="post" id="point_form_{{$point->id}}">
                         @csrf
                         <input type="hidden" name="point_id" value="{{$point->id}}">
+
+                        <!-- <input type="hidden" name="point_id" value="{{$point->id}}"> -->
+
                         <h5 class="card-title" id="point_name_{{$point->id}}">{{$point->name}}</h5>
                         <div id="point_form_name_{{$point->id}}" class="d-none">
                             <input type="text" 
@@ -66,26 +69,34 @@
                                 class="btn btn-danger m-1"
                                 onclick="pointDelete({{$point->id}})">Удалить</button>
                         <button type="button" 
-                                class="btn btn-success m-1">Показать на карте</button>
+                                class="btn btn-success m-1" 
+                                id="btn_goToPoint_{{$point->id}}"
+                                onclick="goToPoint({{$point->id}})">Показать на карте</button>
                     </form>
                 </div>
             </div>
         @endforeach
+<script>
+    let points = [
+        @foreach ($points as $point)
+            {
+                name:"{{ $point->name }}",
+                latitude:{{ $point->latitude  }},
+                longitude:{{ $point->longitude }}
+            },
+        @endforeach
+    ];
 
-        <!-- <div class="card my-3" style="width: 100%;">
-            <div class="card-body">
-                <h5 class="card-title">Point name</h5>
-                <p class="card-text"><b>Широта:</b> 323</p>
-                <p class="card-text"><b>Широта:</b> 323</p>
-                <button type="button" class="btn btn-primary m-1">Редактировать</button>
-                <button type="button" class="btn btn-warning m-1 d-none">Применить</button>
-                <button type="button" class="btn btn-danger m-1">Удалить</button>
-                <button type="button" class="btn btn-success m-1">Показать на карте</button>
-            </div>
-        </div> -->
+</script>
     </div>
     <div class="col-9">
         <div id="map" style="width: 600px; height: 400px"></div>
+        <!-- <div>
+            <button onclick="setCenter()">Меняем центр</button>
+            <button onclick="addPoint()">Новая точка</button>
+            <button onclick="getCoor()">Получить координаты</button>
+            
+        </div> -->
     </div>
 
 </div>

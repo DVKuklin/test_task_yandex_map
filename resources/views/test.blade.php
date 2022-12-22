@@ -7,7 +7,9 @@
     <title>test</title>
 </head>
 <body>
-    {{$message}}
+    <pre>
+        {{var_dump($message)}}
+    </pre>
     <pre>
         return view('test',['message'=>'Мы в pointUpdate']);
     </pre>
