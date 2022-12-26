@@ -5,151 +5,117 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Point;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class PointController extends Controller
 {
     public function createPoint(Request $request) {
         $point = $request->validate([
-            'name' => 'required',
+            'name' => [
+                        'required',
+                        //Существует ли точка с таким именем у данного пользователя
+                        Rule::unique('points')->where(function ($query) {
+                            return $query->where('user_id', Auth::id());
+                        }),
+                    ],
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
         ],[
             'name.required' => 'Поле Имя является обязательным',
+            'name.unique' => 'Точка с таким именем уже существует',
             'latitude.required' => 'Поле Широта является обязательным',
             'latitude.numeric' => 'Значение широты должно быть числом',
             'longitude.required' => 'Поле Долгота является обязательным',
             'longitude.numeric' => 'Значение Долготы должно быть числом',
         ]);
 
-        $user_id = Auth::id();
-
-        // Проверяем есть ли другая точка с таким именем у этого пользователя
-        $pointWithSameName = Point::where('name',$point["name"])
-                                    ->where('user_id',$user_id)
-                                    ->first();
-
-        if ($pointWithSameName) {
-            return back()->withErrors(['Точка с таким именем уже существует.']);
-        }
 
         try{
-            $res = Point::create([
+            Point::create([
                 'name' => $point["name"],
                 'latitude' => $point["latitude"],
                 'longitude' => $point["longitude"],
-                'user_id' => $user_id
+                'user_id' => Auth::id()
             ]);
 
-            if ($res) {
-                return redirect()->route('page.home')->with('success', 'Точка успешно создана.');
-            } else {
-                return redirect()->route('page.home')->withErrors(['Что то пошло не так, точка не создана.']);
-            }
-
+            return redirect()->route('page.home')->with('success', 'Точка успешно создана.');
 
         } catch(Exception $e){
             return redirect()->route('page.home')->withErrors(['Что то пошло не так, точка не создана.']);
         }
-
-    }
-
-    static function getPoints() {
-        $user_id = Auth::id();
-
-        $points = Point::where('user_id',$user_id)
-                        ->select('id','name','latitude','longitude')
-                        ->orderBy('created_at','desc')
-                        ->get();
-
-        return $points;
     }
 
     public function updatePoint(Request $request) {
         $point = $request->validate([
-            'point_id' => 'required|integer',
-            'name' => 'required',
+            'point_id' => [
+                            'required',
+                            'integer',
+                            //Принадлежит ли точка пользователю
+                            Rule::exists('points','id')->where(function ($query) {
+                                return $query->where('user_id', Auth::id());
+                            })
+                        ],
+            'name' => [
+                        'required',
+                        //Существует ли точка с таким именем у данного пользователя
+                        Rule::unique('points')->where(function ($query) {
+                            return $query->where('user_id', Auth::id());
+                        })->ignore($request->point_id),
+                      ],
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
         ],[
-            'point_id.required' => 'Что то не так, перезагрузите страницу',
-            'point_id.integer' => 'Что то не так, перезагрузите страницу',
+            'point_id.required' => 'Что то не так, перезагрузите страницу 1',
+            'point_id.integer' => 'Что то не так, перезагрузите страницу 2',
+            'point_id.exists' => 'Что то не так, перезагрузите страницу 3',
             'name.required' => 'Поле Имя является обязательным',
+            'name.unique' => 'Точка с таким именем уже существует',
             'latitude.required' => 'Поле Широта является обязательным',
             'latitude.numeric' => 'Значение широты должно быть числом',
             'longitude.required' => 'Поле Долгота является обязательным',
             'longitude.numeric' => 'Значение Долготы должно быть числом',
         ]);
 
-        //Проверяем принадлежит ли точка пользователю
-        $pointFromBd = Point::where('id',$point["point_id"])
-                            ->where('user_id',Auth::id())
-                            ->first();
+        try {
+            Point::where('id',$point["point_id"])
+                        ->update([
+                            'name'=>$point["name"],
+                            'latitude'=>$point["latitude"],
+                            'longitude'=>$point["longitude"]
+                        ]);
 
-        if (!$pointFromBd) {
-            return back()->withErrors(['Что то пошло не так, перезагрузите страницу.']);
+            return back()->with('success','Точка успешно изменена.');
+            
+        } catch(Exception $e)  {
+            return back()->withErrors(['Что то пошло не так, точка не изменена.']);
         }
-
-        // Проверяем есть ли другая точка с таким именем у этого пользователя
-        $pointWithSameName = Point::where('name',$point["name"])
-                                  ->where('user_id',Auth::id())
-                                  ->where('id','!=',$point["point_id"])
-                                  ->first();
-
-        if ($pointWithSameName) {
-            return back()->withErrors(['Точка с таким именем уже существует.']);
-        } else {
-            try {
-                $res = Point::where('id',$point["point_id"])
-                            ->update([
-                                'name'=>$point["name"],
-                                'latitude'=>$point["latitude"],
-                                'longitude'=>$point["longitude"]
-                            ]);
-                if ($res) {
-                    return back()->with('success','Точка успешно изменена.');
-                } else {
-                    return back()->withErrors(['Что то пошло не так, точка не изменена.']);
-                }
-                
-            } catch(Exeption $e)  {
-                return back()->withErrors(['Что то пошло не так, точка не изменена.']);
-            }
-        }
-
 
     }
 
     public function deletePoint(Request $request) {
         $point = $request->validate([
-            'point_id' => 'required|integer',
+            'point_id' => [
+                'required',
+                'integer',
+                //Принадлежит ли точка пользователю
+                Rule::exists('points','id')->where(function ($query) {
+                    return $query->where('user_id', Auth::id());
+                })
+            ],
         ],[
             'point_id.required' => 'Что то не так, перезагрузите страницу',
             'point_id.integer' => 'Что то не так, перезагрузите страницу',
+            'point_id.exists' => 'Что то не так, перезагрузите страницу'
         ]);
 
-        //Проверяем принадлежит ли точка пользователю
-        $pointFromBd = Point::where('id',$point["point_id"])
-                            ->where('user_id',Auth::id())
-                            ->first();
-
-        if (!$pointFromBd) {
-            return back()->withErrors(['Что то пошло не так, перезагрузите страницу.']);
-        }
-
         try {
-            $res = Point::where('id',$point["point_id"])
+            Point::where('id',$point["point_id"])
                         ->delete();
 
-            if ($res) {
-                return back()->with('success','Точка успешно удалена.');
-            } else {
-                return back()->withErrors(['Что то пошло не так, точка не удалена.']);
-            }
+            return back()->with('success','Точка успешно удалена.');
             
-        } catch(Exeption $e)  {
+        } catch(Exception $e)  {
             return back()->withErrors(['Что то пошло не так.']);
         }
-
     }
-
 }
