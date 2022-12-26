@@ -23,7 +23,7 @@
         </div>
         <div class="mb-3">
             <label for="exampleInputPassword1" class="form-label">Подтверждение пароля</label>
-            <input type="password" class="form-control" name="password_confirm">
+            <input type="password" class="form-control" name="password_confirmation">
         </div>
         <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
     </form>

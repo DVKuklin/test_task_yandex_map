@@ -7,38 +7,34 @@ use Illuminate\Support\Facades\Auth;
 use Hash;
 use App\Models\User;
 
+
 class AuthController extends Controller
 {
     public function register(Request $request) {
         if (Auth::user()) {
             return redirect()->route('page.home');
         }
-        
+
         $credentials = $request->validate([
-            'name' => ['required'],
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-            'password_confirm' => ['required']
+            'name' => 'required',
+            'email' => [
+                            'required',
+                            'email',
+                            'unique:App\Models\User,email'
+                        ],
+            'password' => 'required|confirmed',
+            'password_confirmation' => 'required'
         ], [
             'email.required' => 'Поле Email является обязательным',
+            'email.email' => 'Недопустимый формат email',
+            'email.unique' => 'Пользователь с таким email уже существует',
             'name.required' => 'Поле Имя является обязательным',
             'password.required' => 'Поле Пароль является обязательным',
-            'password_confirm.required' => 'Поле Подтверждение пароля является обязательным',
+            'password.confirmed' => 'Пароли не совпадают',
+            'password_confirmation.required' => 'Поле Подтверждение пароля является обязательным',
         ]);
 
-        if ($credentials["password"] != $credentials["password_confirm"]) {
-            return redirect()->route('page.register')->withErrors(['Пароли не совпадают']);
-        }
-
         try{
-            $res = User::where('name',$credentials["name"])
-                        ->where('email',$credentials["email"])
-                        ->first();
-            
-            if ($res) {
-                return redirect()->route('page.register')->withErrors(['Пользователь с такими данными уже существует.']);
-            } 
-
             $res = User::create([
                 'name' => $credentials["name"], 
                 'email' => $credentials["email"],
@@ -50,13 +46,13 @@ class AuthController extends Controller
                     $request->session()->regenerate();
         
                     return redirect()->route('page.home')->with('success', 'Вы успешно зарегистрировались на сайте.');
-                } else {
-                    return redirect()->route('page.register')->withErrors(['Что то пошло не так.','Ваши данные в базу записались, но авторизоваться Вы не смогли.','Попробуйте просто авторизоваться.']);
                 }
-            } else {
-                redirect()->route('page.register')->withErrors(['Что то пошло не так, попробуй ещё раз.']);
+
+                return redirect()->route('page.register')->withErrors(['Что то пошло не так.','Ваши данные в базу записались, но авторизоваться Вы не смогли.','Попробуйте просто авторизоваться.']);
+
             }
 
+            redirect()->route('page.register')->withErrors(['Что то пошло не так, попробуй ещё раз.']);
 
         }catch(Exception $e){
             return redirect()->route('page.register')->withErrors(['Что то пошло не так, попробуй ещё раз.']);
@@ -90,8 +86,8 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             return redirect()->route('page.home')->with('success', 'Вы успешно авторизовались на сайте.');
-        } else {
-            return redirect()->route('page.login')->withErrors(['Вы не авторизовались.','Возможно Вы ввели не верные данные.','Попробуйте еще раз.']);
         }
+
+        return redirect()->route('page.login')->withErrors(['Вы не авторизовались.','Возможно Вы ввели не верные данные.','Попробуйте еще раз.']);
     }
 }

@@ -35,4 +35,5 @@ Route::name('point.')->prefix('point')->controller(PointController::class)->grou
     Route::post('/create', 'createPoint')->name('create')->middleware('auth');
     Route::post('/update', 'updatePoint')->name('update')->middleware('auth');
     Route::post('/delete', 'deletePoint')->name('delete')->middleware('auth');
+    Route::post('/test', 'test')->name('test')->middleware('auth');
 });

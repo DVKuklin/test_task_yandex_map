@@ -26,8 +26,6 @@
                         @csrf
                         <input type="hidden" name="point_id" value="{{$point->id}}">
 
-                        <!-- <input type="hidden" name="point_id" value="{{$point->id}}"> -->
-
                         <h5 class="card-title" id="point_name_{{$point->id}}">{{$point->name}}</h5>
                         <div id="point_form_name_{{$point->id}}" class="d-none">
                             <input type="text" 
@@ -91,12 +89,6 @@
     </div>
     <div class="col-9">
         <div id="map" style="width: 600px; height: 400px"></div>
-        <!-- <div>
-            <button onclick="setCenter()">Меняем центр</button>
-            <button onclick="addPoint()">Новая точка</button>
-            <button onclick="getCoor()">Получить координаты</button>
-            
-        </div> -->
     </div>
 
 </div>
