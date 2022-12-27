@@ -35,24 +35,19 @@ class AuthController extends Controller
         ]);
 
         try{
-            $res = User::create([
+            User::create([
                 'name' => $credentials["name"], 
                 'email' => $credentials["email"],
                 'password' => Hash::make($credentials["password"])
             ]);
     
-            if ($res) {
-                if (Auth::attempt($credentials)) {
-                    $request->session()->regenerate();
-        
-                    return redirect()->route('page.home')->with('success', 'Вы успешно зарегистрировались на сайте.');
-                }
-
-                return redirect()->route('page.register')->withErrors(['Что то пошло не так.','Ваши данные в базу записались, но авторизоваться Вы не смогли.','Попробуйте просто авторизоваться.']);
-
+            if (Auth::attempt($credentials)) {
+                $request->session()->regenerate();
+    
+                return redirect()->route('page.home')->with('success', 'Вы успешно зарегистрировались на сайте.');
             }
 
-            redirect()->route('page.register')->withErrors(['Что то пошло не так, попробуй ещё раз.']);
+            return redirect()->route('page.register')->withErrors(['Что то пошло не так.','Ваши данные в базу записались, но авторизоваться Вы не смогли.','Попробуйте просто авторизоваться.']);
 
         }catch(Exception $e){
             return redirect()->route('page.register')->withErrors(['Что то пошло не так, попробуй ещё раз.']);
