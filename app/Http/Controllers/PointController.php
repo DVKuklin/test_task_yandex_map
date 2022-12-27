@@ -89,7 +89,6 @@ class PointController extends Controller
         } catch(Exception $e)  {
             return back()->withErrors(['Что то пошло не так, точка не изменена.']);
         }
-
     }
 
     public function deletePoint(Request $request) {
